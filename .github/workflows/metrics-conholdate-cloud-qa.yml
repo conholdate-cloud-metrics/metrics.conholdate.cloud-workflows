@@ -60,7 +60,15 @@ jobs:
         
       - name: Deploy qa-metrics.conholdate.cloud
         run: hugo --config "./config/conholdate-cloud-qa.toml" deploy --target "Staging" --invalidateCDN --maxDeletes -1 --logFile ./log.txt
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
+       - name: Upload to Ceph S3
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.CEPH_S3_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.CEPH_S3_SECRET_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.CEPH_S3_REGION }}
+        ENDPOINT_URL: ${{ secrets.CEPH_S3_ENDPOINT }}
+        BUCKET_NAME: ${{ secrets.CEPH_S3_BUCKET }}
+      run: |
+        pip install awscli
+        aws --endpoint-url=$ENDPOINT_URL s3 sync public/ s3://$BUCKET_NAME/ --delete
+ 
    
