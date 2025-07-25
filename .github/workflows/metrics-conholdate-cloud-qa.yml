@@ -70,6 +70,8 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.CEPH_S3_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CEPH_S3_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_ENDPOINT_URL: https://s3-admin-qa.dynabic.com
  
       - name: Purge BunnyCDN Cache
         run: |
