@@ -64,13 +64,27 @@ jobs:
             hugo-version: '0.110.0'
             
       # Also specifies the theme we want to use
-      - name: Build
+      - name: Build site
         run: hugo --config "./config/conholdate-cloud-live.toml" --minify
         
-      - name: Deploy metrics.conholdate.cloud
-        run: hugo --config "./config/conholdate-cloud-live.toml" deploy --target "Production" --invalidateCDN --maxDeletes 256 #-force?
+      #- name: Deploy metrics.conholdate.cloud
+      #  run: hugo --config "./config/conholdate-cloud-live.toml" deploy --target "Production" --invalidateCDN --maxDeletes 256 #-force?
+       
+        - name: Sync to Ceph S3
+        run: |
+          aws s3 sync ./public/ s3://metrics-conholdate-cloud/ \
+            --endpoint-url https://s3.dynabic.com \
+            --acl public-read \
+            --delete
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
-
-  
+          AWS_ACCESS_KEY_ID: ${{ secrets.CEPH_S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CEPH_S3_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_ENDPOINT_URL: https://s3-admin.dynabic.com
+ 
+      - name: Purge BunnyCDN Cache
+        run: |
+           curl -siG \
+            -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
+            --data-urlencode "url=https://metrics.conholdate.cloud" \
+            "https://api.dynabic.com/bn/purge?async=true"
