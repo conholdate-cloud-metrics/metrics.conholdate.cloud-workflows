@@ -70,7 +70,7 @@ jobs:
       #- name: Deploy metrics.conholdate.cloud
       #  run: hugo --config "./config/conholdate-cloud-live.toml" deploy --target "Production" --invalidateCDN --maxDeletes 256 #-force?
        
-        - name: Sync to Ceph S3
+      - name: Sync to Ceph S3
         run: |
           aws s3 sync ./public/ s3://metrics-conholdate-cloud/ \
             --endpoint-url https://s3.dynabic.com \
